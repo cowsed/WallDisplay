@@ -93,6 +93,7 @@ var mainTempl *template.Template
 var frontTempl *template.Template
 
 func main() {
+	time.Local = time.FixedZone("America/New_York", -4*60*60)
 
 	//read template 1
 	f2, err := os.Open("main.html")
