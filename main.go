@@ -15,11 +15,15 @@ import (
 var calendar_filename = "cal.ics"
 var current_weather Weather
 
+var today_events []gocal.Event
+var tomorrow_events []gocal.Event
+var overmorrow_events []gocal.Event
+
 type Data struct {
-	RightNow                    time.Time
-	EventsToday, EventsTomorrow []gocal.Event
-	W                           *BasicWeather
-	FirstLabel, SecondLabel     string
+	RightNow                  time.Time
+	FirstEvents, SecondEvents []gocal.Event
+	W                         *BasicWeather
+	FirstLabel, SecondLabel   string
 }
 
 func handleFront(w http.ResponseWriter, r *http.Request) {
@@ -28,44 +32,53 @@ func handleFront(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 }
+func doCalendar() {
+	for {
+		// open calendar
+		f, err := os.Open(calendar_filename)
+		check(err)
 
+		// read calendar
+		bs, _ := io.ReadAll(f)
+		var calendarReader io.ReadSeeker = bytes.NewReader(bs)
+		f.Close()
+
+		rightNow := time.Now()
+		startOfToday := time.Date(rightNow.Year(), rightNow.Month(), rightNow.Day(), 0, 0, 0, 0, rightNow.Location())
+		endOfToday := startOfToday.AddDate(0, 0, 1)
+		endOfTomorrow := endOfToday.AddDate(0, 0, 1)
+		endOfOvermorrow := endOfTomorrow.AddDate(0, 0, 1)
+
+		today_events = GetEventsInTimeFrame(rightNow, endOfToday, calendarReader)
+		tomorrow_events = GetEventsInTimeFrame(endOfToday, endOfTomorrow, calendarReader)
+		overmorrow_events = GetEventsInTimeFrame(endOfTomorrow, endOfOvermorrow, calendarReader)
+
+		log.Println("Updated Calendar")
+		time.Sleep(5 * time.Minute)
+	}
+}
 func handleInside(w http.ResponseWriter, r *http.Request) {
 	var rolledOver = false
-	rightNow := time.Now()
-	endOfToday := time.Date(rightNow.Year(), rightNow.Month(), rightNow.Day(), 0, 0, 0, 0, rightNow.Location()).AddDate(0, 0, 1)
 
-	//get all events today
-	eventsToday := GetEventsInTimeFrame(rightNow, endOfToday, calendarReader)
-	if len(eventsToday) == 0 {
-		//dont show
+	if len(today_events) == 0 {
 		rolledOver = true
-		rightNow = endOfToday.Add(time.Second)
-		endOfToday = time.Date(rightNow.Year(), rightNow.Month(), rightNow.Day(), 0, 0, 0, 0, rightNow.Location()).AddDate(0, 0, 1)
 
 	}
-
-	endOfTomorrow := endOfToday.AddDate(0, 0, 1)
-
-	//get all events today
-	eventsToday = GetEventsInTimeFrame(rightNow, endOfToday, calendarReader)
-	if len(eventsToday) == 0 {
-		log.Println("SOMETHING VERY BAD HAS HAPPENED")
-	}
-	//get all events tomorrow
-	eventsTomorrow := GetEventsInTimeFrame(endOfToday, endOfTomorrow, calendarReader)
 
 	//all the data to be shown
 	data := Data{
-		RightNow:       time.Now(),
-		EventsToday:    eventsToday,
-		EventsTomorrow: eventsTomorrow,
-		W:              &myw,
-		FirstLabel:     "Today",
-		SecondLabel:    "Tomorrow",
+		RightNow:     time.Now(),
+		FirstEvents:  today_events,
+		SecondEvents: tomorrow_events,
+		W:            &myw,
+		FirstLabel:   "Today",
+		SecondLabel:  "Tomorrow",
 	}
 	if rolledOver {
 		data.FirstLabel = "Tomorrow"
 		data.SecondLabel = "Overmorrow"
+		data.FirstEvents = tomorrow_events
+		data.SecondEvents = overmorrow_events
 	}
 
 	//write to asker
@@ -76,23 +89,14 @@ func handleInside(w http.ResponseWriter, r *http.Request) {
 	//we done
 }
 
-var calendarReader io.ReadSeeker
 var mainTempl *template.Template
 var frontTempl *template.Template
 
 func main() {
-	//open calendar
-	f, err := os.Open(calendar_filename)
-	check(err)
-
-	//read calendar
-	bs, _ := io.ReadAll(f)
-	var rs io.ReadSeeker = bytes.NewReader(bs)
-	defer f.Close()
-	calendarReader = rs
 
 	//read template 1
 	f2, err := os.Open("main.html")
+	check(err)
 	bs2, _ := io.ReadAll(f2)
 	tmpl := template.New("walldisplay")
 	tmpl, _ = tmpl.Parse(string(bs2))
@@ -108,6 +112,7 @@ func main() {
 
 	//take care of weather
 	go doWeather()
+	go doCalendar()
 
 	//handle requests
 	http.HandleFunc("/inside", http.HandlerFunc(handleInside))

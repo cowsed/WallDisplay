@@ -114,7 +114,7 @@
 
             <h2> {{.FirstLabel}} </h2>
             <div class="eventList">
-                {{range .EventsToday}}
+                {{range .FirstEvents}}
                 <strong>{{.Start.Local.Format "03:04 PM"}} - {{.Summary}}</strong>
                 <br>
                 {{end}}
@@ -122,7 +122,7 @@
 
             <h2> {{.SecondLabel}}</h2>
             <div class="eventList">
-                {{range .EventsTomorrow}}
+                {{range .SecondEvents}}
                 <strong>{{.Start.Local.Format "03:04 PM"}} - {{.Summary}}</strong>
                 <br>
                 {{end}}

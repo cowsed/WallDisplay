@@ -35,14 +35,15 @@ func doWeather() {
 		}
 		bs, _ := io.ReadAll(resp.Body)
 		err = json.Unmarshal(bs, &raww)
-		fmt.Println(string(bs))
+		//fmt.Println(string(bs))
 		if err != nil {
 			log.Println(err)
 			continue
 		}
+		log.Println("Updated Weather")
 		myw.Location = fmt.Sprintf("%s, %s", raww.NearestArea[0].AreaName[0].Value, raww.NearestArea[0].Region[0].Value)
 		myw.FeelsLike = raww.CurrentCondition[0].FeelsLikeF
-		fmt.Println("LOCATION: ", myw.Location)
+		//fmt.Println("LOCATION: ", myw.Location)
 		time.Sleep(5 * time.Minute)
 	}
 }
