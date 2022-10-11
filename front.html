@@ -16,11 +16,11 @@
             try {
                 wakelock = await navigator.wakeLock.request();
                 wakelock.addEventListener('release', () => {
-                    alert('Screen Wake State Locked:', !wakelock.released);
+                    alert('Screen Wake State Locked:' + !wakelock.released);
                 });
-                alert('Screen Wake State Locked:', !wakelock.released);
+                alert('Screen Wake State Locked:' + !wakelock.released);
             } catch (e) {
-                alert('Failed to lock wake state with reason:', e.message);
+                alert('Failed to lock wake state with reason:' + e.message);
             }
         }
         lockWakeState()
