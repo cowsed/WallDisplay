@@ -10,17 +10,17 @@
         let wakelock;
         async function lockWakeState() {
             if (!canWakeLock()) {
-                console.error("Cant lock")
+                alert("Cant lock")
                 return;
             }
             try {
                 wakelock = await navigator.wakeLock.request();
                 wakelock.addEventListener('release', () => {
-                    console.log('Screen Wake State Locked:', !wakelock.released);
+                    alert('Screen Wake State Locked:', !wakelock.released);
                 });
-                console.log('Screen Wake State Locked:', !wakelock.released);
+                alert('Screen Wake State Locked:', !wakelock.released);
             } catch (e) {
-                console.error('Failed to lock wake state with reason:', e.message);
+                alert('Failed to lock wake state with reason:', e.message);
             }
         }
         lockWakeState()
