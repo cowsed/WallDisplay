@@ -60,8 +60,15 @@ func doCalendar() {
 }
 func handleInside(w http.ResponseWriter, r *http.Request) {
 	var rolledOver = false
+	rightNow := time.Now()
+	var trimmed_events_today []gocal.Event
+	for i := range today_events {
+		if today_events[i].Start.After(rightNow) {
+			trimmed_events_today = append(trimmed_events_today, today_events[i])
+		}
+	}
 
-	if len(today_events) == 0 {
+	if len(trimmed_events_today) == 0 {
 		rolledOver = true
 
 	}
@@ -69,7 +76,7 @@ func handleInside(w http.ResponseWriter, r *http.Request) {
 	//all the data to be shown
 	data := Data{
 		RightNow:     time.Now(),
-		FirstEvents:  today_events,
+		FirstEvents:  trimmed_events_today,
 		SecondEvents: tomorrow_events,
 		W:            &myw,
 		FirstLabel:   "Today",
