@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -92,6 +93,8 @@ func handleInside(w http.ResponseWriter, r *http.Request) {
 var mainTempl *template.Template
 var frontTempl *template.Template
 
+const portNum = 8080
+
 func main() {
 	time.Local = time.FixedZone("America/New_York", -4*60*60)
 
@@ -118,7 +121,9 @@ func main() {
 	//handle requests
 	http.HandleFunc("/inside", http.HandlerFunc(handleInside))
 	http.HandleFunc("/", http.HandlerFunc(handleFront))
-	http.ListenAndServe(":8080", nil)
+
+	log.Printf("Starting server at localhost:%d\n", portNum)
+	http.ListenAndServe(fmt.Sprintf(":%d", portNum), nil)
 }
 
 func GetEventsInTimeFrame(start, end time.Time, rs io.ReadSeeker) []gocal.Event {

@@ -43,6 +43,7 @@ func doWeather() {
 		log.Println("Updated Weather")
 		myw.Location = fmt.Sprintf("%s, %s", raww.NearestArea[0].AreaName[0].Value, raww.NearestArea[0].Region[0].Value)
 		myw.FeelsLike = raww.CurrentCondition[0].FeelsLikeF
+		myw.Desc = raww.CurrentCondition[0].WeatherDesc[0].Value
 		//fmt.Println("LOCATION: ", myw.Location)
 		time.Sleep(5 * time.Minute)
 	}

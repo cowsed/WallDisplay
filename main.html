@@ -20,25 +20,30 @@
             }
 
             function replace(content) {
-                console.log("Replacing")
-                console.log("content:")
                 var el = document.createElement('html');
                 el.innerHTML = content
                 bod = el.getElementsByTagName('body')[0]
                 console.log(bod)
                 document.body.innerHTML = bod.innerHTML
 
+                navigator.getBattery().then(function(battery) {
+
+                    var level = battery.level;
+
+                    console.log(level);
+                    document.getElementById("battery-level").innerHTML = level * 100 + "% charged"
+                });
             }
 
             function update_window() {
                 httpGetAsync(myURL, replace)
-
+                //update battery
             }
 
-
+            update_window()
             var intervalId = window.setInterval(function() {
                 update_window()
-            }, 60 * 1000);
+            }, 1 * 1000);
         </script>
         <style>
             :root {
@@ -104,7 +109,8 @@
             <div style="font-size: .5em;">
                 <strong>{{.W.Location}}</strong>
                 <br>
-                <p>{{.W.FeelsLike}}°F</p>
+                <p>{{.W.FeelsLike}}° - {{.W.Desc}}</p>
+                <p id="battery-level"></p>
             </div>
         </div>
 
