@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<meta http-equiv="refresh" content="60">
+
+<head>
+
+    <head>
+        <title>Display</title>
+        <script>
+            myURL = window.location.href
+            console.log(myURL)
+
+            function httpGetAsync(theUrl, callback) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                        callback(xmlHttp.responseText);
+                }
+                xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+                xmlHttp.send(null);
+            }
+
+            function replace(content) {
+                console.log("Replacing")
+                console.log("content:")
+                var el = document.createElement('html');
+                el.innerHTML = content
+                bod = el.getElementsByTagName('body')[0]
+                console.log(bod)
+                document.body.innerHTML = bod.innerHTML
+
+            }
+
+            function update_window() {
+                httpGetAsync(myURL, replace)
+
+            }
+
+
+            var intervalId = window.setInterval(function() {
+                update_window()
+            }, 60 * 1000);
+        </script>
+        <style>
+            :root {
+                --fg: #8ec07c;
+                --bg: #689d6a;
+                --text: #282828
+            }
+
+            html,
+            body {
+                background-color: var(--fg);
+                padding: 0;
+                margin: 0;
+                font-family: 'Courier New', monospace;
+            }
+
+            .full {
+                text-align: center;
+                vertical-align: middle;
+                background-color: var(--fg);
+
+                color: var(--text);
+            }
+
+            .left {
+                font-size: 3em;
+                height: 75vh;
+            }
+
+            .right {
+                height: 75vh;
+                font-size: 2em;
+            }
+
+            .eventList {
+                text-align: left;
+                margin-left: 15%;
+                width: 70%;
+                background-color: var(--bg);
+                padding: 2%;
+                font-size: .7em;
+            }
+
+            .bottomInfo {
+                font-size: 2em;
+                margin: 0;
+                padding: 0;
+                height: 22vh;
+            }
+        </style>
+
+    </head>
+
+
+
+<body>
+    <div style="width: 100%; overflow: hidden; padding: 0;" class="full">
+        <!--Left-->
+        <div style="width: 50%;  float: left;" class="left">
+            <br><br>
+            <h1 onclick="document.documentElement.requestFullscreen()">{{.RightNow.Format "3:04PM"}}</h1>
+            <p>{{.RightNow.Format "January 2, 2006"}}</p>
+            <div style="font-size: .5em;">
+                <strong>{{.W.Location}}</strong>
+                <br>
+                <p>{{.W.FeelsLike}}°F</p>
+            </div>
+        </div>
+
+        <!--Right-->
+        <div style="margin-left: 50%; " class="right">
+            <br><br><br>
+
+            <h2> {{.FirstLabel}} </h2>
+            <div class="eventList">
+                {{range .EventsToday}}
+                <strong>{{.Start.Local.Format "03:04 PM"}} - {{.Summary}}</strong>
+                <br>
+                {{end}}
+            </div>
+
+            <h2> {{.SecondLabel}}</h2>
+            <div class="eventList">
+                {{range .EventsTomorrow}}
+                <strong>{{.Start.Local.Format "03:04 PM"}} - {{.Summary}}</strong>
+                <br>
+                {{end}}
+            </div>
+
+        </div>
+
+        <!--Bottom-->
+        <div class="bottomInfo">
+
+        </div>
+    </div>
+</body>
+</head>
