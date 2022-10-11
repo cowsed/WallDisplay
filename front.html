@@ -5,9 +5,14 @@
     <title>Wall Display</title>
     <script>
         console.log("Started")
+        const canWakeLock = () => 'wakeLock' in navigator;
+
         let wakelock;
         async function lockWakeState() {
-            if (!canWakeLock()) return;
+            if (!canWakeLock()) {
+                console.error("Cant lock")
+                return;
+            }
             try {
                 wakelock = await navigator.wakeLock.request();
                 wakelock.addEventListener('release', () => {
@@ -18,6 +23,7 @@
                 console.error('Failed to lock wake state with reason:', e.message);
             }
         }
+        lockWakeState()
     </script>
 </head>
 
